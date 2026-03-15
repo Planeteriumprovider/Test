@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SnaX | Central Admin Panel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-V2: #00dc82;
+            --bg: #030712;
+            --font-main: 'Outfit', sans-serif;
+            --primary: #00dc82;
+            --primary-glow: rgba(0, 220, 130, 0.3);
+            
+            --card: #111827;
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text: #f8fafc;
+            --danger: #ef4444;
+            --edit: #3b82f6;
+        }
+
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  
+        /* Verhindert das Rauszoomen und seitliches Wackeln */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 20px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(20px);
+            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .logo {
+            font-family: 'Rubik Mono One'; 
+            font-size: 1.6rem; 
+            color: var(--primary);
+            letter-spacing: -1px;
+            text-decoration: none;
+        }
+
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a {
+            color: var(--text); text-decoration: none; margin-left: 30px;
+            font-weight: 600; transition: 0.3s; opacity: 0.7;
+        }
+        .nav-links a:hover { opacity: 1; color: var(--primary); }
+
+        .btn-V2 {
+            background: var(--primary-V2); color: #000; padding: 12px 28px;
+            border-radius: 12px; font-weight: 800; text-decoration: none;
+            display: inline-block; cursor: pointer; border: none; transition: 0.3s;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        .btn-V2:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--primary-glow); }
+
+        /* --- HAMBURGER ANIMATION (1zu1 aus deinem Code) --- */
+        .hamburger { display: none; cursor: pointer; z-index: 1100; }
+        .bar { display: block; width: 28px; height: 3px; margin: 5px auto; background-color: var(--primary); transition: 0.3s; border-radius: 3px; }
+
+        @media (max-width: 768px) {
+            nav { padding: 15px 25px; }
+            .hamburger { display: block; }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+            .nav-links {
+                position: fixed; right: -100%; top: 0; flex-direction: column;
+                background: rgba(2, 6, 23, 0.98); backdrop-filter: blur(25px);
+                width: 100%; height: 100vh; justify-content: center; transition: 0.4s; gap: 40px;
+            }
+            .nav-links.active { right: 0; }
+            .nav-links a { margin: 0; font-size: 1.5rem; }
+  }      
+
+        /* --- Login Box --- */
+        #login-overlay {
+            position: fixed; inset: 0; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            z-index: 2000; display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .login-box {
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 30px; text-align: center;
+            border: 1px solid var(--card-border); width: 100%; max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .login-box h1 { font-family: 'Rubik Mono One'; font-size: 1.8rem; margin-bottom: 10px; color: #fff; }
+        
+        .login-input {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: white;
+            padding: 15px; border-radius: 12px; outline: none; width: 100%; box-sizing: border-box;
+            font-size: 1rem; transition: 0.3s; text-align: center;
+        }
+        .login-input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+
+        .btn-login {
+            background: var(--primary); color: #000; padding: 15px; width: 100%;
+            border-radius: 12px; font-weight: 900; cursor: pointer; border: none;
+            margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-login:hover { transform: translateY(-3px); box-shadow: 0 10px 20px var(--primary-glow); }
+
+        /* --- Admin Layout --- */
+        #admin-container { 
+            display: none; width: 100%; max-width: 1100px; margin: 0 auto;
+            padding: 40px 20px; box-sizing: border-box;
+        }
+        
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 50px; background: rgba(255,255,255,0.03); padding: 20px;
+            border-radius: 20px; border: 1px solid var(--card-border);
+        }
+        .header h1 { font-family: 'Rubik Mono One'; margin: 0; font-size: clamp(1rem, 5vw, 1.5rem); }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.1); color: var(--danger);
+            padding: 10px 18px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2);
+            cursor: pointer; font-weight: 700; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-logout:hover { background: var(--danger); color: white; }
+
+        .section-card {
+            background: var(--card); padding: clamp(20px, 5vw, 35px); border-radius: 28px;
+            margin-bottom: 40px; border: 1px solid var(--card-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h2 { font-family: 'Rubik Mono One'; color: var(--primary); font-size: 1rem; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
+
+        .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        
+        input, textarea {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); color: white;
+            padding: 14px; border-radius: 12px; outline: none; width: 100%; font-family: inherit;
+            box-sizing: border-box; transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); }
+
+        .btn-save {
+            background: var(--primary); color: #000; padding: 14px 30px;
+            border-radius: 12px; font-weight: 800; cursor: pointer; border: none; transition: 0.3s;
+        }
+
+        /* Table Design */
+        .table-container { width: 100%; overflow-x: auto; margin-top: 25px; border-radius: 15px; background: rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { text-align: left; padding: 18px; background: rgba(255,255,255,0.03); color: var(--primary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 18px; border-bottom: 1px solid var(--card-border); font-size: 0.95rem; }
+
+        .actions { display: flex; gap: 10px; }
+        .btn-action { width: 38px; height: 38px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: 0.2s; }
+        .btn-edit { background: rgba(59, 130, 246, 0.15); color: var(--edit); border: 1px solid rgba(59, 130, 246, 0.2); }
+        .btn-edit:hover { background: var(--edit); color: white; }
+        .btn-del { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .btn-del:hover { background: var(--danger); color: white; }
+
+        .icon-preview { width: 40px; font-size: 1.2rem; color: var(--primary); text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="login-overlay">
+            <nav>
+        <a href="#" class="logo">SNAX</a>
+        
+        <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+
+        <div class="nav-links" id="nav-links">
+        <a href="Startseite.html" onclick="toggleMenu()"><i class="fas fa-house"></i> Über uns</a>
+        <a href="Item.html" onclick="toggleMenu()"><i class="fas fa-shopping-bag"></i> Items</a>
+        <a href="Rules.html" onclick="toggleMenu()"><i class="fas fa-gavel"></i> Regeln</a>
+        <a href="Admin.html" onclick="toggleMenu()"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="https://discord.gg/eBZRakvCEW" class="btn-V2"><i class="fab fa-discord"></i> Discord</a>
+        </div>
+    </nav>
+
+
+        <div class="login-box">
+            <h1>SNAX ADMIN</h1>
+            <p style="font-size: 0.9rem; opacity: 0.5; margin-bottom: 25px;">Geschützter Bereich</p>
+            <input type="password" id="pass-input" class="login-input" placeholder="Passwort eingeben...">
+            <button class="btn-login" onclick="checkLogin()">Einloggen <i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i></button>
+        </div>
+    </div>
+
+    <div id="admin-container">
+        <div class="header">
+            <div>
+                <h1>DASHBOARD</h1>
+                <p style="color: var(--primary); font-size: 0.8rem; font-weight: 700; margin-top: 5px;">SNAX SYSTEM v2.0</p>
+            </div>
+            <button class="btn-logout" onclick="location.reload()">
+                <i class="fas fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+
+        <div class="section-card">
+            <h2><i class="fas fa-box-open"></i> SHOP ITEMS VERWALTEN</h2>
+            <div class="form-group">
+                <input type="text" id="i-name" placeholder="Item Name">
+                <input type="text" id="i-price" placeholder="Preis (z.B. 100.000$)">
+                <input type="text" id="i-icon" placeholder="FontAwesome Icon (fas fa-gem)">
+                <textarea id="i-desc" placeholder="Kurze Beschreibung des Items..."></textarea>
+            </div>
+            <button class="btn-save" id="save-item-btn" onclick="saveItem()">Item Speichern</button>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Icon</th>
+                            <th>Item Name</th>
+                            <th>Preis</th>
+                            <th style="width: 100px;">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="item-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2><i class="fas fa-shield-alt"></i> REGELWERK ANPASSEN</h2>
+            <div class="form-group">
+                <input type="text" id="r-title" placeholder="Regel Titel">
+                <input type="text" id="r-icon" placeholder="Icon (fas fa-gavel)">
+                <input type="text" id="r-punishment" placeholder="Strafe">
+                <textarea id="r-text" placeholder="Regel-Details..."></textarea>
+            </div>
+            <button class="btn-save" id="save-rule-btn" onclick="saveRule()">Regel Speichern</button>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Icon</th>
+                            <th>Regel</th>
+                            <th>Strafe</th>
+                            <th style="width: 100px;">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rule-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASS = "SnaXv2Cyber18312011";
+        let editItemIndex = -1;
+        let editRuleIndex = -1;
+
+        function checkLogin() {
+            if(document.getElementById('pass-input').value === ADMIN_PASS) {
+                document.getElementById('login-overlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-overlay').style.display = 'none';
+                    document.getElementById('admin-container').style.display = 'block';
+                    renderAll();
+                }, 300);
+            } else { 
+                alert("Zugriff verweigert!"); 
+            }
+        }
+
+        // --- Logik für Items ---
+        function saveItem() {
+            let items = JSON.parse(localStorage.getItem('snax_items')) || [];
+            const data = {
+                name: document.getElementById('i-name').value,
+                price: document.getElementById('i-price').value,
+                icon: document.getElementById('i-icon').value || 'fas fa-cube',
+                desc: document.getElementById('i-desc').value
+            };
+
+            if(editItemIndex > -1) {
+                items[editItemIndex] = data;
+                editItemIndex = -1;
+                document.getElementById('save-item-btn').innerText = "Item Speichern";
+            } else {
+                items.push(data);
+            }
+
+            localStorage.setItem('snax_items', JSON.stringify(items));
+            clearFields(['i-name', 'i-price', 'i-icon', 'i-desc']);
+            renderAll();
+        }
+
+        function editItem(index) {
+            let items = JSON.parse(localStorage.getItem('snax_items'));
+            const it = items[index];
+            document.getElementById('i-name').value = it.name;
+            document.getElementById('i-price').value = it.price;
+            document.getElementById('i-icon').value = it.icon;
+            document.getElementById('i-desc').value = it.desc;
+            editItemIndex = index;
+            document.getElementById('save-item-btn').innerText = "Änderung speichern";
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function deleteItem(index) {
+            if(confirm("Soll dieses Item wirklich entfernt werden?")) {
+                let items = JSON.parse(localStorage.getItem('snax_items'));
+                items.splice(index, 1);
+                localStorage.setItem('snax_items', JSON.stringify(items));
+                renderAll();
+            }
+        }
+        
+                const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('nav-links');
+
+        hamburger.addEventListener('click', toggleMenu);
+
+        function toggleMenu() {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            // Verhindert Scrollen wenn offen
+            if(navLinks.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+            }
+
+        // --- Logik für Regeln ---
+        function saveRule() {
+            let rules = JSON.parse(localStorage.getItem('snax_rules')) || [];
+            const data = {
+                t: document.getElementById('r-title').value,
+                d: document.getElementById('r-text').value,
+                p: document.getElementById('r-punishment').value,
+                i: document.getElementById('r-icon').value || 'fas fa-gavel'
+            };
+
+            if(editRuleIndex > -1) {
+                rules[editRuleIndex] = data;
+                editRuleIndex = -1;
+                document.getElementById('save-rule-btn').innerText = "Regel Speichern";
+            } else {
+                rules.push(data);
+            }
+
+            localStorage.setItem('snax_rules', JSON.stringify(rules));
+            clearFields(['r-title', 'r-text', 'r-punishment', 'r-icon']);
+            renderAll();
+        }
+
+        function editRule(index) {
+            let rules = JSON.parse(localStorage.getItem('snax_rules'));
+            const r = rules[index];
+            document.getElementById('r-title').value = r.t;
+            document.getElementById('r-text').value = r.d;
+            document.getElementById('r-punishment').value = r.p;
+            document.getElementById('r-icon').value = r.i;
+            editRuleIndex = index;
+            document.getElementById('save-rule-btn').innerText = "Änderung speichern";
+        }
+
+        function deleteRule(index) {
+            if(confirm("Regel löschen?")) {
+                let rules = JSON.parse(localStorage.getItem('snax_rules'));
+                rules.splice(index, 1);
+                localStorage.setItem('snax_rules', JSON.stringify(rules));
+                renderAll();
+            }
+        }
+
+        function clearFields(ids) { ids.forEach(id => document.getElementById(id).value = ''); }
+
+        function renderAll() {
+            const items = JSON.parse(localStorage.getItem('snax_items')) || [];
+            document.getElementById('item-table-body').innerHTML = items.map((it, idx) => `
+                <tr>
+                    <td class="icon-preview"><i class="${it.icon}"></i></td>
+                    <td><strong>${it.name}</strong></td>
+                    <td>${it.price}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn-action btn-edit" onclick="editItem(${idx})"><i class="fas fa-pen"></i></button>
+                            <button class="btn-action btn-del" onclick="deleteItem(${idx})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            const rules = JSON.parse(localStorage.getItem('snax_rules')) || [];
+            document.getElementById('rule-table-body').innerHTML = rules.map((r, idx) => `
+                <tr>
+                    <td class="icon-preview"><i class="${r.i}"></i></td>
+                    <td><strong>${r.t}</strong></td>
+                    <td style="color: #ff7e7e; font-weight: 700;">${r.p}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn-action btn-edit" onclick="editRule(${idx})"><i class="fas fa-pen"></i></button>
+                            <button class="btn-action btn-del" onclick="deleteRule(${idx})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

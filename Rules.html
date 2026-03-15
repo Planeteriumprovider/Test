@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnaX | Discord Onboarding</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Poppins:wght@400;600;800&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00dc82; 
+            --primary-V2: #00dc82;
+            --primary-glow: rgba(0, 220, 130, 0.4);
+            --bg: #030712;
+            --bg-menu: #020617;
+            --card: rgba(30, 41, 59, 0.5);
+            --card-bg: rgba(13, 18, 30, 0.9);
+            --text: #f8fafc;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --discord: #5865F2;
+            --discord-glow: rgba(88, 101, 242, 0.4);
+            --font-main: 'Outfit', sans-serif;
+            --font-logo: 'Rubik Mono One', sans-serif;
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        #bg-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+            z-index: -1;
+        }       
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 20px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(20px);
+            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .logo {
+            font-family: 'Rubik Mono One'; 
+            font-size: 1.6rem; 
+            color: var(--primary);
+            letter-spacing: -1px;
+        }
+
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a {
+            color: var(--text); text-decoration: none; margin-left: 30px;
+            font-weight: 600; transition: 0.3s; opacity: 0.7;
+        }
+        .nav-links a:hover { opacity: 1; color: var(--primary); }
+
+        /* Hamburger Animation (1zu1) */
+        .hamburger { display: none; cursor: pointer; z-index: 1100; }
+        .bar { display: block; width: 28px; height: 3px; margin: 5px auto; background-color: var(--primary); transition: 0.3s; border-radius: 3px; }
+
+        @media (max-width: 768px) {
+            nav { padding: 15px 25px; }
+            .hamburger { display: block; }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+            .nav-links {
+                position: fixed; right: -100%; top: 0; flex-direction: column;
+                background: rgba(2, 6, 23, 0.98); backdrop-filter: blur(25px);
+                width: 100%; height: 100vh; justify-content: center; transition: 0.4s; gap: 40px;
+            }
+            .nav-links.active { right: 0; }
+            .nav-links a { margin: 0; font-size: 1.5rem; }
+        }
+
+        
+        .btn-V2 {
+            background: var(--primary-V2); color: #000; padding: 12px 28px;
+            border-radius: 12px; font-weight: 800; text-decoration: none;
+            display: inline-block; cursor: pointer; border: none; transition: 0.3s;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        .btn-V2:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--primary-glow); }
+
+        /* Background Stars & Spheres */
+        #bg-container { position: fixed; inset: 0; z-index: -1; background: #020617; overflow: hidden; }
+        .star { position: absolute; width: 2px; height: 2px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 8px var(--primary); }
+        .glow-sphere { position: absolute; width: 500px; height: 500px; background: var(--primary-glow); filter: blur(140px); border-radius: 50%; z-index: -1; animation: pulse 10s infinite alternate; }
+
+        /* Glass Box */
+        .glass-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 2px solid var(--primary);
+            padding: 50px;
+            border-radius: 35px;
+            text-align: center;
+            width: 92%;
+            max-width: 650px;
+            height: 680px; 
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s ease, opacity 0.5s ease;
+        }
+
+        h1.logo {
+            font-family: var(--font-logo);
+            font-size: clamp(3rem, 10vw, 4.5rem);
+            line-height: 1;
+            margin: 0;
+            background: linear-gradient(to bottom, #fff 50%, #64748b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.1));
+        }
+
+        .step-label {
+            color: var(--primary);
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 5px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .rule-title { font-size: 2rem; font-weight: 900; margin-bottom: 12px; color: #fff; letter-spacing: -0.5px; }
+
+/* Fix für Rules.html CSS */
+.rule-scroll-area {
+    width: 100%;
+    flex-grow: 1;
+    overflow-y: auto;   /* Nur hoch/runter */
+    overflow-x: hidden; /* KEIN seitliches Scrollen */
+    margin: 15px 0;
+    padding: 0 15px;
+    box-sizing: border-box;
+    word-wrap: break-word; /* Bricht lange Wörter um */
+}
+
+.rule-desc { 
+    color: var(--text-muted); 
+    line-height: 1.6; 
+    font-size: 1.1rem; 
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%; /* Verhindert Ausbrechen */
+}
+
+/* Icon Container Fix */
+#rule-icon-small {
+    font-size: 4rem;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+
+        .progress-bar-container {
+            width: 100%; height: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px; margin-bottom: 30px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        #progress-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--primary), #00ff95);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transition: width 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .punishment-badge {
+            background: rgba(239, 68, 68, 0.08);
+            color: #ff7e7e;
+            padding: 10px 22px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: #030712;
+            border: none;
+            padding: 22px 40px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(0, 220, 130, 0.2);
+        }
+
+        .btn-action:disabled { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.2); box-shadow: none; cursor: not-allowed; }
+        .btn-action:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 15px 35px var(--primary-glow); }
+        .btn-action:active:not(:disabled) { transform: translateY(0); }
+
+        #cooldown-timer { background: rgba(0,0,0,0.3); padding: 4px 12px; border-radius: 8px; font-weight: 700; color: var(--primary); }
+
+        /* End Screen Design */
+        #main-content { display: none; opacity: 0; width: 100%; max-width: 900px; text-align: center; z-index: 10; transition: all 1s ease; }
+        .brand-header h1 { font-family: var(--font-logo); font-size: clamp(4rem, 15vw, 7rem); margin: 0; background: linear-gradient(180deg, #ffffff 0%, #475569 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: float 5s infinite ease-in-out; }
+        .verified-badge { display: inline-flex; align-items: center; gap: 10px; background: rgba(0, 220, 130, 0.1); color: var(--primary); border: 1px solid rgba(0, 220, 130, 0.2); padding: 10px 20px; border-radius: 50px; font-weight: 700; margin: 30px 0; }
+        .discord-btn { display: inline-flex; align-items: center; gap: 18px; background: linear-gradient(145deg, #5865F2, #4752c4); color: white; padding: 22px 60px; border-radius: 20px; text-decoration: none; font-weight: 900; font-size: 1.4rem; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 15px 40px var(--discord-glow); }
+        .discord-btn:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 50px var(--discord-glow); }
+
+        .icon-container {
+            width: 110px; height: 110px;
+            background: rgba(0, 220, 130, 0.05);
+            border: 1px solid rgba(0, 220, 130, 0.1);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 3.5rem;
+            margin: 25px 0;
+            animation: float 4s infinite ease-in-out;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-15px) rotate(2deg); } }
+        @keyframes pulse { from { opacity: 0.2; transform: scale(0.9) translate(-5%, -5%); } to { opacity: 0.5; transform: scale(1.1) translate(5%, 5%); } }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <nav>
+        <div style="font-family: 'Rubik Mono One'; font-size: 1.6rem; color: var(--primary); letter-spacing: -1px;">SNAX</div>
+        
+        <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+
+        <div class="nav-links" id="nav-links">
+        <a href="Startseite.html" onclick="toggleMenu()"><i class="fas fa-house"></i> Über uns</a>
+        <a href="Item.html" onclick="toggleMenu()"><i class="fas fa-shopping-bag"></i> Items</a>
+        <a href="Rules.html" onclick="toggleMenu()"><i class="fas fa-gavel"></i> Regeln</a>
+        <a href="Admin.html" onclick="toggleMenu()"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="https://discord.gg/eBZRakvCEW" class="btn-V2"><i class="fab fa-discord"></i> Discord</a>
+        </div>
+    </nav>
+    
+    <audio id="bg-music" loop>
+        <source src="C418 - Moog City.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="bg-container">
+        <div class="glow-sphere" style="top: -15%; left: -10%;"></div>
+        <div class="glow-sphere" style="bottom: -15%; right: -10%; background: rgba(56, 189, 248, 0.15);"></div>
+    </div>
+
+    <div id="onboarding" class="glass-box">
+        <div id="step-content" style="display: flex; flex-direction: column; align-items: center; height: 100%; width: 100%;">
+            <div style="margin-top: 20px;">
+                <span class="step-label">Willkommen bei</span>
+                <h1 class="logo">SNAX</h1>
+            </div>
+            <div class="icon-container"><i class="fas fa-shield-halved"></i></div>
+            <div class="rule-scroll-area" style="overflow: hidden; justify-content: center;">
+                <p class="rule-desc">
+                    Der offizielle SnaX Discord (Inoffiziell Teil von Opsucht).<br>
+                    Bevor du loslegst, bestätige bitte unser Regelwerk.
+                </p>
+            </div>
+            <button class="btn-action" onclick="startRules()" id="start-btn">Regeln lesen <i class="fas fa-arrow-right"></i></button>
+        </div>
+        
+        <div id="rules-area" style="display: none; flex-direction: column; align-items: center; height: 100%; width: 100%; opacity: 0; transition: opacity 0.4s ease;">
+            <div class="progress-bar-container"><div id="progress-fill"></div></div>
+            <span class="step-label" id="rule-number">Regel 1</span>
+            <div id="rule-icon-small" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--primary-glow));"></div>
+            <h2 class="rule-title" id="rule-title">Titel</h2>
+            <div class="rule-scroll-area" id="main-rule-scroll">
+                <p class="rule-desc" id="rule-text">Text</p>
+            </div>
+            <div id="punishment" class="punishment-badge">Punishment: -</div>
+            <button class="btn-action" onclick="nextRule()" id="next-btn">
+                <span>Verstanden & Weiter</span>
+                <span id="cooldown-timer" style="display:none;">5</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="brand-header"><h1>SnaX</h1></div>
+        <div class="verified-badge"><i class="fas fa-check-circle"></i> Regelwerk akzeptiert</div>
+        <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 40px auto; line-height: 1.8; font-family: var(--font-body); font-size: 1.1rem;">
+            Du hast das Regelwerk erfolgreich durchgelesen. Willkommen in der Community! Klicke unten, um deinem Schicksal beizutreten.
+        </p>
+        <a href="https://discord.gg/eBZRakvCEW" class="discord-btn"><i class="fab fa-discord"></i> JETZT BEITRETEN</a>
+    </div>
+
+    <script>
+        const music = document.getElementById('bg-music');
+        music.volume = 0.15;
+
+        const bgContainer = document.getElementById('bg-container');
+        for(let i=0; i<75; i++) {
+            const p = document.createElement('div');
+            p.className = 'star';
+            p.style.top = Math.random() * 100 + '%';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.width = p.style.height = (Math.random() * 3) + 'px';
+            p.style.opacity = Math.random() * 0.7;
+            p.style.animation = `float ${Math.random() * 6 + 4}s infinite ease-in-out`;
+            bgContainer.appendChild(p);
+        }
+
+/* Globaler Speicher */
+let rules = JSON.parse(localStorage.getItem('snax_rules')) || [
+    { t: "Beispiel", d: "Regeltext", p: "Strafe", i: "fa-gavel" } 
+];
+
+
+
+
+        let currentStep = 0;
+
+        function startRules() {
+            music.play().catch(e => console.log("Audio blockiert."));
+            document.getElementById('step-content').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('step-content').style.display = 'none';
+                const rulesArea = document.getElementById('rules-area');
+                rulesArea.style.display = 'flex';
+                setTimeout(() => rulesArea.style.opacity = '1', 50);
+                showRule();
+            }, 300);
+        }
+
+        function startCooldown() {
+            const btn = document.getElementById('next-btn');
+            const timerSpan = document.getElementById('cooldown-timer');
+            let timeLeft = 5;
+            btn.disabled = true;
+            timerSpan.style.display = 'inline-block';
+            timerSpan.innerText = timeLeft;
+            const timer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    timerSpan.style.display = 'none';
+                } else { timerSpan.innerText = timeLeft; }
+            }, 1000);
+        }
+
+        function showRule() {
+            const rule = rules[currentStep];
+            const ruleArea = document.getElementById('rules-area');
+            const scrollArea = document.getElementById('main-rule-scroll');
+            
+            ruleArea.style.transform = 'translateY(10px)';
+            ruleArea.style.opacity = '0.5';
+
+            setTimeout(() => {
+                document.getElementById('rule-number').innerText = `Regel ${currentStep + 1} von ${rules.length}`;
+                document.getElementById('rule-title').innerText = rule.t;
+                document.getElementById('rule-text').innerText = rule.d;
+                document.getElementById('punishment').innerText = `Punishment: ${rule.p}`;
+                document.getElementById('rule-icon-small').innerHTML = `<i class="${rule.i}"></i>`;
+                document.getElementById('progress-fill').style.width = ((currentStep + 1) / rules.length) * 100 + '%';
+                scrollArea.scrollTop = 0;
+                
+                ruleArea.style.transform = 'translateY(0)';
+                ruleArea.style.opacity = '1';
+                startCooldown();
+            }, 200);
+        }
+
+        function nextRule() {
+            if (currentStep < rules.length - 1) {
+                currentStep++;
+                showRule();
+            } else {
+                const box = document.getElementById('onboarding');
+                box.style.opacity = '0';
+                box.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    box.style.display = 'none';
+                    const main = document.getElementById('main-content');
+                    main.style.display = 'block';
+                    setTimeout(() => {
+                        main.style.opacity = '1';
+                        main.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 500);
+            }
+        }
+        
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('nav-links');
+
+        hamburger.addEventListener('click', toggleMenu);
+
+        function toggleMenu() {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : 'auto';
+        }
+    </script>
+</body>
+</html>

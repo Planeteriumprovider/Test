@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnaX | Official Community</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00dc82;
+            --bg: #020617;
+            --card: rgba(30, 41, 59, 0.5);
+            --text: #f8fafc;
+        }
+
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+          
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Hintergrund & Navigation */
+        #bg-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+            z-index: -1;
+        }
+
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 20px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(15px);
+            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a {
+            color: var(--text); text-decoration: none; margin-left: 30px;
+            font-weight: 600; transition: 0.3s; opacity: 0.7; cursor: pointer;
+        }
+        .nav-links a:hover { opacity: 1; color: var(--primary); }
+
+        /* Hamburger Animation Styles (Bleibt 1:1) */
+        .hamburger { display: none; cursor: pointer; z-index: 1100; }
+        .bar {
+            display: block; width: 28px; height: 3px; margin: 5px auto;
+            background-color: var(--primary); transition: all 0.3s ease-in-out; border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 15px 25px; }
+            .hamburger { display: block; }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+            .nav-links {
+                position: fixed; right: -100%; top: 0; flex-direction: column;
+                background-color: rgba(2, 6, 23, 0.98); backdrop-filter: blur(20px);
+                width: 100%; height: 100vh; justify-content: center;
+                transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); gap: 40px; margin: 0;
+            }
+            .nav-links.active { right: 0; }
+            .nav-links a { margin: 0; font-size: 1.5rem; }
+        }
+
+        /* Hero & Sections */
+        section { padding: 120px 10% 60px; min-height: 80vh; }
+        .hero { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .hero h1 { 
+            font-family: 'Rubik Mono One'; font-size: clamp(2.5rem, 8vw, 6rem); 
+            margin: 0; background: linear-gradient(180deg, #fff, #475569);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* Grid & Cards */
+        .grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px; margin-top: 40px;
+        }
+        .item-card {
+            background: var(--card); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 24px; padding: 25px; transition: 0.4s; position: relative;
+        }
+        .item-card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,220,130,0.1); }
+        .price-tag {
+            background: var(--primary); color: #000; padding: 5px 15px;
+            border-radius: 10px; font-weight: 800; display: inline-block; margin-top: 15px;
+        }
+
+        .btn {
+            background: var(--primary); color: #000; padding: 15px 35px;
+            border-radius: 12px; font-weight: 700; text-decoration: none;
+            display: inline-block; cursor: pointer; border: none; transition: 0.3s;
+        }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--primary); }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="bg-glow"></div>
+
+    <nav>
+        <div style="font-family: 'Rubik Mono One'; font-size: 1.5rem; color: var(--primary);">SNAX</div>
+        
+        <div class="hamburger" id="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+
+        <div class="nav-links" id="nav-links">
+        <a href="Startseite.html" onclick="toggleMenu()"><i class="fas fa-house"></i> Über uns</a>
+        <a href="Item.html" onclick="toggleMenu()"><i class="fas fa-shopping-bag"></i> Items</a>
+        <a href="Rules.html" onclick="toggleMenu()"><i class="fas fa-gavel"></i> Regeln</a>
+        <a href="Admin.html" onclick="toggleMenu()"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="https://discord.gg/eBZRakvCEW" class="btn"><i class="fab fa-discord"></i> Discord</a>
+        </div>
+    </nav>
+
+    <section class="hero" id="about">
+        <span style="color: var(--primary); font-weight: 800; letter-spacing: 5px;">OFFIZIELL SNAX</span>
+        <h1>WELCOME</h1>
+        <p style="max-width: 800px; color: #94a3b8; font-size: 1.2rem; line-height: 1.8;">
+            Willkommen im Herzstück der SnaX-Community. Wir sind mehr als nur eine Gemeindschaft – wir sind eine Bewegung. 
+            Hier findest du High-End Content, exklusive Shop-Items und eine Gemeinschaft, die Gaming auf ein neues Level hebt. 
+            Scrolle nach unten, um unseren aktuellen Katalog zu durchstöbern.
+        </p>
+        <div style="margin-top: 30px;">
+            <a href="#items" class="btn" style="background: transparent; border: 1px solid var(--primary); color: var(--primary);">Katalog ansehen</a>
+        </div>
+    </section>
+
+    <section id="items">
+        <h2 style="font-size: 3rem; margin-bottom: 10px;">Item Katalog</h2>
+        <p style="color: #94a3b8; max-width: 500px;">Unsere Auswahl an digitalen Gütern. Alle Käufe werden sicher über unseren Discord-Support abgewickelt.</p>
+
+        <div class="grid" id="item-list">
+            </div>
+    </section>
+
+    <script>
+        
+        /* Globaler Speicher */
+let items = JSON.parse(localStorage.getItem('snax_items')) || [];
+
+        function renderItems() {
+            const itemList = document.getElementById('item-list');
+            itemList.innerHTML = '';
+            items.forEach((item) => {
+                itemList.innerHTML += `
+                    <div class="item-card">
+                        <i class="fas ${item.icon}" style="font-size: 2.2rem; color: var(--primary);"></i>
+                        <h3 style="margin: 15px 0 10px 0;">${item.name}</h3>
+                        <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.4;">${item.desc}</p>
+                        <div class="price-tag">${item.price}</div>
+                    </div>
+                `;
+            });
+        }
+
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('nav-links');
+
+        hamburger.addEventListener('click', () => {
+            toggleMenu();
+        });
+
+        function toggleMenu() {
+            if (window.innerWidth <= 768) {
+                hamburger.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : 'auto';
+            }
+        }
+
+        renderItems();
+    </script>
+</body>
+</html>
