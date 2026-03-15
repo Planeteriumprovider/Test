@@ -264,159 +264,180 @@
     </div>
 
     <script>
-        const ADMIN_PASS = "SnaXv2Cyber18312011";
-        let editItemIndex = -1;
-        let editRuleIndex = -1;
+const ADMIN_PASS = "SnaXv2Cyber18312011";
+let editItemIndex = -1;
+let editRuleIndex = -1;
 
-        function checkLogin() {
-            if(document.getElementById('pass-input').value === ADMIN_PASS) {
-                document.getElementById('login-overlay').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('login-overlay').style.display = 'none';
-                    document.getElementById('admin-container').style.display = 'block';
-                    renderAll();
-                }, 300);
-            } else { 
-                alert("Zugriff verweigert!"); 
-            }
+// Zentrale Daten (werden vom Server geladen)
+let currentData = { items: [], rules: [] };
+
+// 1. DATEN VOM SERVER LADEN (Ersetzt localStorage)
+async function renderAll() {
+    try {
+        const response = await fetch('data.json');
+        if (response.ok) {
+            currentData = await response.json();
         }
+    } catch (e) {
+        console.log("Noch keine data.json vorhanden oder Server-Fehler.");
+    }
 
-        // --- Logik für Items ---
-        function saveItem() {
-            let items = JSON.parse(localStorage.getItem('snax_items')) || [];
-            const data = {
-                name: document.getElementById('i-name').value,
-                price: document.getElementById('i-price').value,
-                icon: document.getElementById('i-icon').value || 'fas fa-cube',
-                desc: document.getElementById('i-desc').value
-            };
+    // Items in die Tabelle rendern
+    document.getElementById('item-table-body').innerHTML = (currentData.items || []).map((it, idx) => `
+        <tr>
+            <td class="icon-preview"><i class="${it.icon}"></i></td>
+            <td><strong>${it.name}</strong></td>
+            <td>${it.price}</td>
+            <td>
+                <div class="actions">
+                    <button class="btn-action btn-edit" onclick="editItem(${idx})"><i class="fas fa-pen"></i></button>
+                    <button class="btn-action btn-del" onclick="deleteItem(${idx})"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
 
-            if(editItemIndex > -1) {
-                items[editItemIndex] = data;
-                editItemIndex = -1;
-                document.getElementById('save-item-btn').innerText = "Item Speichern";
-            } else {
-                items.push(data);
-            }
+    // Regeln in die Tabelle rendern
+    document.getElementById('rule-table-body').innerHTML = (currentData.rules || []).map((r, idx) => `
+        <tr>
+            <td class="icon-preview"><i class="${r.i}"></i></td>
+            <td><strong>${r.t}</strong></td>
+            <td style="color: #ff7e7e; font-weight: 700;">${r.p}</td>
+            <td>
+                <div class="actions">
+                    <button class="btn-action btn-edit" onclick="editRule(${idx})"><i class="fas fa-pen"></i></button>
+                    <button class="btn-action btn-del" onclick="deleteRule(${idx})"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
 
-            localStorage.setItem('snax_items', JSON.stringify(items));
-            clearFields(['i-name', 'i-price', 'i-icon', 'i-desc']);
+// 2. DATEN AN SERVER SENDEN (Die wichtigste Funktion)
+async function syncWithServer() {
+    try {
+        const response = await fetch('save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentData)
+        });
+        const result = await response.json();
+        console.log("Server Status:", result.status);
+    } catch (e) {
+        alert("Fehler beim Speichern auf dem Server! Prüfe die save.php");
+    }
+}
+
+// LOGIN
+function checkLogin() {
+    if(document.getElementById('pass-input').value === ADMIN_PASS) {
+        document.getElementById('login-overlay').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-container').style.display = 'block';
             renderAll();
-        }
+        }, 300);
+    } else { 
+        alert("Zugriff verweigert!"); 
+    }
+}
 
-        function editItem(index) {
-            let items = JSON.parse(localStorage.getItem('snax_items'));
-            const it = items[index];
-            document.getElementById('i-name').value = it.name;
-            document.getElementById('i-price').value = it.price;
-            document.getElementById('i-icon').value = it.icon;
-            document.getElementById('i-desc').value = it.desc;
-            editItemIndex = index;
-            document.getElementById('save-item-btn').innerText = "Änderung speichern";
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+// ITEM SPEICHERN
+async function saveItem() {
+    const data = {
+        name: document.getElementById('i-name').value,
+        price: document.getElementById('i-price').value,
+        icon: document.getElementById('i-icon').value || 'fas fa-cube',
+        desc: document.getElementById('i-desc').value
+    };
 
-        function deleteItem(index) {
-            if(confirm("Soll dieses Item wirklich entfernt werden?")) {
-                let items = JSON.parse(localStorage.getItem('snax_items'));
-                items.splice(index, 1);
-                localStorage.setItem('snax_items', JSON.stringify(items));
-                renderAll();
-            }
-        }
-        
-                const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('nav-links');
+    if(editItemIndex > -1) {
+        currentData.items[editItemIndex] = data;
+        editItemIndex = -1;
+        document.getElementById('save-item-btn').innerText = "Item Speichern";
+    } else {
+        if(!currentData.items) currentData.items = [];
+        currentData.items.push(data);
+    }
 
-        hamburger.addEventListener('click', toggleMenu);
+    await syncWithServer(); 
+    clearFields(['i-name', 'i-price', 'i-icon', 'i-desc']);
+    renderAll();
+}
 
-        function toggleMenu() {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('active');
-            // Verhindert Scrollen wenn offen
-            if(navLinks.classList.contains('active')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = 'auto';
-            }
-            }
+function editItem(index) {
+    const it = currentData.items[index];
+    document.getElementById('i-name').value = it.name;
+    document.getElementById('i-price').value = it.price;
+    document.getElementById('i-icon').value = it.icon;
+    document.getElementById('i-desc').value = it.desc;
+    editItemIndex = index;
+    document.getElementById('save-item-btn').innerText = "Änderung speichern";
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
 
-        // --- Logik für Regeln ---
-        function saveRule() {
-            let rules = JSON.parse(localStorage.getItem('snax_rules')) || [];
-            const data = {
-                t: document.getElementById('r-title').value,
-                d: document.getElementById('r-text').value,
-                p: document.getElementById('r-punishment').value,
-                i: document.getElementById('r-icon').value || 'fas fa-gavel'
-            };
+async function deleteItem(index) {
+    if(confirm("Soll dieses Item wirklich entfernt werden?")) {
+        currentData.items.splice(index, 1);
+        await syncWithServer();
+        renderAll();
+    }
+}
 
-            if(editRuleIndex > -1) {
-                rules[editRuleIndex] = data;
-                editRuleIndex = -1;
-                document.getElementById('save-rule-btn').innerText = "Regel Speichern";
-            } else {
-                rules.push(data);
-            }
+// REGEL SPEICHERN
+async function saveRule() {
+    const data = {
+        t: document.getElementById('r-title').value,
+        d: document.getElementById('r-text').value,
+        p: document.getElementById('r-punishment').value,
+        i: document.getElementById('r-icon').value || 'fas fa-gavel'
+    };
 
-            localStorage.setItem('snax_rules', JSON.stringify(rules));
-            clearFields(['r-title', 'r-text', 'r-punishment', 'r-icon']);
-            renderAll();
-        }
+    if(editRuleIndex > -1) {
+        currentData.rules[editRuleIndex] = data;
+        editRuleIndex = -1;
+        document.getElementById('save-rule-btn').innerText = "Regel Speichern";
+    } else {
+        if(!currentData.rules) currentData.rules = [];
+        currentData.rules.push(data);
+    }
 
-        function editRule(index) {
-            let rules = JSON.parse(localStorage.getItem('snax_rules'));
-            const r = rules[index];
-            document.getElementById('r-title').value = r.t;
-            document.getElementById('r-text').value = r.d;
-            document.getElementById('r-punishment').value = r.p;
-            document.getElementById('r-icon').value = r.i;
-            editRuleIndex = index;
-            document.getElementById('save-rule-btn').innerText = "Änderung speichern";
-        }
+    await syncWithServer();
+    clearFields(['r-title', 'r-text', 'r-punishment', 'r-icon']);
+    renderAll();
+}
 
-        function deleteRule(index) {
-            if(confirm("Regel löschen?")) {
-                let rules = JSON.parse(localStorage.getItem('snax_rules'));
-                rules.splice(index, 1);
-                localStorage.setItem('snax_rules', JSON.stringify(rules));
-                renderAll();
-            }
-        }
+function editRule(index) {
+    const r = currentData.rules[index];
+    document.getElementById('r-title').value = r.t;
+    document.getElementById('r-text').value = r.d;
+    document.getElementById('r-punishment').value = r.p;
+    document.getElementById('r-icon').value = r.i;
+    editRuleIndex = index;
+    document.getElementById('save-rule-btn').innerText = "Änderung speichern";
+}
 
-        function clearFields(ids) { ids.forEach(id => document.getElementById(id).value = ''); }
+async function deleteRule(index) {
+    if(confirm("Regel löschen?")) {
+        currentData.rules.splice(index, 1);
+        await syncWithServer();
+        renderAll();
+    }
+}
 
-        function renderAll() {
-            const items = JSON.parse(localStorage.getItem('snax_items')) || [];
-            document.getElementById('item-table-body').innerHTML = items.map((it, idx) => `
-                <tr>
-                    <td class="icon-preview"><i class="${it.icon}"></i></td>
-                    <td><strong>${it.name}</strong></td>
-                    <td>${it.price}</td>
-                    <td>
-                        <div class="actions">
-                            <button class="btn-action btn-edit" onclick="editItem(${idx})"><i class="fas fa-pen"></i></button>
-                            <button class="btn-action btn-del" onclick="deleteItem(${idx})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+function clearFields(ids) { ids.forEach(id => document.getElementById(id).value = ''); }
 
-            const rules = JSON.parse(localStorage.getItem('snax_rules')) || [];
-            document.getElementById('rule-table-body').innerHTML = rules.map((r, idx) => `
-                <tr>
-                    <td class="icon-preview"><i class="${r.i}"></i></td>
-                    <td><strong>${r.t}</strong></td>
-                    <td style="color: #ff7e7e; font-weight: 700;">${r.p}</td>
-                    <td>
-                        <div class="actions">
-                            <button class="btn-action btn-edit" onclick="editRule(${idx})"><i class="fas fa-pen"></i></button>
-                            <button class="btn-action btn-del" onclick="deleteRule(${idx})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
+// Hamburger Menü
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('nav-links');
+hamburger.addEventListener('click', toggleMenu);
+
+function toggleMenu() {
+    hamburger.classList.toggle('active');
+    navLinks.classList.toggle('active');
+    document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : 'auto';
+}
+
     </script>
 </body>
 </html>
